@@ -1,0 +1,21 @@
+import java.util.List;
+import Sites;
+import java.lang.Boolean;
+import java.math.BigDecimal;
+
+public class test {
+	Boolean testf;
+	String name;
+	List<Sites> sites;
+	BigDecimal per;
+	int age;
+}
+
+
+
+public class Sites {
+	String name;
+	String url;
+}
+
+
