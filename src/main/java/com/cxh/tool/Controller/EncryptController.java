@@ -3,6 +3,8 @@ package com.cxh.tool.Controller;
 
 import com.cxh.tool.Utils.EncryptUtils;
 import com.cxh.tool.Utils.FileUtils;
+import com.cxh.tool.config.EncryptConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,12 @@ import java.io.File;
 
 @Controller
 public class EncryptController {
+
+
+    @Autowired
+    private EncryptConfig encryptConfig;
+
+
     /*
      * 获取file.html页面
      */
@@ -32,11 +40,14 @@ public class EncryptController {
     @PostMapping("fileEncrypt")
     @ResponseBody
     public void fileEncrypt(@RequestParam("fileName") MultipartFile file, HttpServletResponse response){
-        new FileUtils().uploadfile(file,"D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile");
-        String content=new FileUtils("D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile\\"+file.getOriginalFilename()).readFileByLine();
+//        new FileUtils().uploadfile(file,"D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile");
+
+        new FileUtils().uploadfile(file,encryptConfig.getUploadFilePath());
+
+        String content=new FileUtils(encryptConfig.getUploadFilePath()+File.separator+file.getOriginalFilename()).readFileByLine();
 
         byte[] contentE=EncryptUtils.encrypt(content,"123456");
-        new FileUtils("D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile\\"+file.getOriginalFilename()+"1").writeFile2(
+        new FileUtils(encryptConfig.getUploadFilePath()+File.separator+file.getOriginalFilename()+"1").writeFile2(
                 EncryptUtils.bytes2HexStr(contentE).getBytes());
 
         // 加密
@@ -52,7 +63,8 @@ public class EncryptController {
 
 
         //下载加密后文件
-        new FileUtils().downLoadFile(file.getOriginalFilename()+"1","_"+epwds,"D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile\\",response);
+        new FileUtils().downLoadFile(file.getOriginalFilename()+"1","_"+epwds,encryptConfig.getUploadFilePath(),response);
+        new FileUtils(encryptConfig.getUploadFilePath()).deleteAllfile();
     }
 
 
@@ -66,9 +78,9 @@ public class EncryptController {
     @PostMapping("fileDecrypt")
     @ResponseBody
     public void fileDecrypt(@RequestParam("fileName") MultipartFile file, HttpServletResponse response){
-        new FileUtils().uploadfile(file,"D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile").trim();
-        String s= new FileUtils("D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile\\"+file.getOriginalFilename()).readFileByLine();
-        byte[] contentE=EncryptUtils.hexStr2Byte(s);
+        new FileUtils().uploadfile(file,encryptConfig.getUploadFilePath()).trim();
+        String s= new FileUtils(encryptConfig.getUploadFilePath()+File.separator+file.getOriginalFilename()).readFileByLine().trim();
+        byte[] contentE=EncryptUtils.hexStringToBytes(s);
 
         String[] filenames=file.getOriginalFilename().split("_");
         String epwds=filenames[filenames.length-1];
@@ -85,8 +97,8 @@ public class EncryptController {
         // 解密
         byte[] decrypt = EncryptUtils.decrypt(contentE, new String(pwd));
         System.out.println("解密后的内容：" + new String(decrypt));
-        new FileUtils("D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile\\"+file.getOriginalFilename().split("_")[0]).writeFile2(decrypt);
-        new FileUtils().downLoadFile(file.getOriginalFilename().split("_")[0],"","D:\\work\\JAVA_PROJECT\\tool\\src\\main\\resources\\tempfile\\",response);
+        new FileUtils(encryptConfig.getUploadFilePath()+File.separator+file.getOriginalFilename().split("_")[0]).writeFile2(decrypt);
+        new FileUtils().downLoadFile(file.getOriginalFilename().split("_")[0],"",encryptConfig.getUploadFilePath(),response);
     }
 
 

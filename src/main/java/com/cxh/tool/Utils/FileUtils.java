@@ -44,7 +44,6 @@ public class FileUtils {
             FileWriter writer = new FileWriter(this.file,append);
             BufferedWriter bw = new BufferedWriter(writer);
             bw.write(str);
-
             bw.close();
             writer.close();
         } catch (FileNotFoundException e) {
@@ -90,9 +89,9 @@ public class FileUtils {
             path = "/home/cxh/tool/tempfile";
         }
 
-        File dest = new File(path + "/" + fileName);
+        File dest = new File(path + File.separator + fileName);
         if(!dest.getParentFile().exists()){ //判断文件父目录是否存在
-            dest.getParentFile().mkdir();
+            dest.getParentFile().mkdirs();
         }
         try {
             file.transferTo(dest); //保存文件
@@ -150,7 +149,7 @@ public class FileUtils {
 
 
     public  void   downLoadFile(String filename,String suffix, String filepath,HttpServletResponse response) {
-        File file = new File(filepath + "/" + filename);
+        File file = new File(filepath + File.separator + filename);
         if(file.exists()){ //判断文件父目录是否存在
             response.setContentType("application/force-download");
             response.setHeader("Content-Disposition", "attachment;fileName=" + filename+suffix);
@@ -184,4 +183,18 @@ public class FileUtils {
     public  void   downLoadFile(String filename, String filepath,HttpServletResponse response) {
         downLoadFile(filename,"", filepath, response);
     }
+
+    public  void   deleteAllfile(){
+        File currentFile=file;
+        if (!file.isDirectory()){
+            currentFile=file.getParentFile();
+        }
+        for (File f:currentFile.listFiles()){
+            if (f.isFile()) {
+                f.delete();
+            }
+        }
+
+    }
+
 }
